@@ -116,7 +116,7 @@ class Koel_Listener_Stats_Admin {
 		$user = ['ID' => $currentUser->ID, 'isAdmin' => in_array('administrator', $currentUser->roles) ? TRUE: FALSE];
 
 		if( $user['isAdmin'] !== TRUE ){	// User is not an admin
-			$wpid = $user['ID'];
+			//$wpid = $user['ID'];
 			require 'partials/koel-listener-stats-admin-display-singleuser.php';
 		} else {
 			$allUsers = get_users();
@@ -133,7 +133,7 @@ class Koel_Listener_Stats_Admin {
 			FROM play_log as pl
 			JOIN ( SELECT so.id, so.title as song_name, alb.name as album_name, alb.id as album_id FROM songs as so JOIN albums as alb ON so.album_id = alb.id ) as song_album
 				ON pl.song_id = song_album.id
-			JOIN users as u ON pl.user_id = u.id WHERE u.wpid = %d AND pl.created_at >= %s
+			JOIN users as u ON pl.user_id = u.id WHERE u.wpid = %d AND pl.created_at <= %s
 			GROUP BY pl.song_id
 		";
 

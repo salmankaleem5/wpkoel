@@ -66,6 +66,10 @@ function koel_login_authenticate_koel_account( $user, $user_login, $password ){
 
 		$token = get_koel_access_token();
 
+		if( empty($token) ){
+			return;
+		}
+
 		// Make request
 		$url = "http://localhost:8000/wpapi/verify";
 		$args = [
@@ -115,10 +119,12 @@ function create_koel_user( $user_id ) {
 		return $user_id;
 	}
 
-	// todo: remove koel url
-
 	// Create corresponding user in Koel
 	$apiToken = get_koel_access_token();
+
+	if( empty($apiToken) ){
+		return;
+	}
 
 	// Make request
 	$url = "http://localhost:8000/wpapi/user";
@@ -151,6 +157,7 @@ function update_koel_user( $user_id, $old_user_data ){
 
 	$requestBody = [];
 
+	// Did email change
 	$userEmail = get_user_meta( $user_id, '_new_email', true );
 	$manuallyUpdateEmail = false;
 	if( !empty($userEmail) ){
@@ -164,12 +171,17 @@ function update_koel_user( $user_id, $old_user_data ){
 		$requestBody['email'] = $user->user_email;
 	}
 
+	// Did name change
 	if( $user->display_name != $old_user_data->display_name ){
 		$requestBody['name'] = $user->display_name;
 	}	
 
 	if( !empty($requestBody) ){
 		$apiToken = get_koel_access_token();
+		
+		if( empty($apiToken) ){
+			return;
+		}
 
 		$url = "http://localhost:8000/wpapi/user/{$user_id}";
 		$args = [
@@ -233,8 +245,9 @@ function get_koel_access_token(){
 		return new WP_Error();
 	}
 
-	$expiresIn = $tokenResponse->expires_in;
-	$token = $tokenResponse->access_token;
+	if( !isset($tokenResponse->access_token) ){
+		return '';
+	}
 
-	return $token;
+	return $tokenResponse->access_token;
 }

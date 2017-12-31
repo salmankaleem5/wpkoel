@@ -12,7 +12,18 @@
  * @subpackage Koel_Listener_Stats/admin/partials
  */
 
-$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+if( current_user_can('manage_options') ){
+	$wpid = $_GET['userID'];
+} else {
+	$wpid = get_current_user_id();
+}
+
+if( isset($_GET['date']) ){
+	$date = $_GET['date'];
+} else {
+	$date = new DateTime('+1 day');
+	$date = $date->format('Y-m-d');
+}
 
 $data = $this->get_play_data($wpid, $date);
 
@@ -30,7 +41,7 @@ $songListenTimes = $data['songListenTimes'];
 	<thead>
 		<tr>
 			<th>Album Name</th>
-			<th>Album Play Count (Since <?php echo $date ?>)</th>
+			<th>Album Play Count - <?php echo $date ?></th>
 			<th>Average Listen Time (Minutes)</th>
 		</tr>
 	</thead>
@@ -53,7 +64,7 @@ $songListenTimes = $data['songListenTimes'];
 	<thead>
 		<tr>
 			<th>Song Name</th>
-			<th>Song Play Count (Since <?php echo $date ?>)</th>
+			<th>Song Play Count - <?php echo $date ?></th>
 			<th>Average Listen Time (Minutes)</th>
 		</tr>
 	</thead>
@@ -72,7 +83,11 @@ $songListenTimes = $data['songListenTimes'];
 
 <form method="GET" action="admin.php">
 	<input type="hidden" name="page" value="koel_stats">
-	<input type="hidden" name="userID" value="<?php echo $data['songs'][0]->user_id ?>">
+	<?php
+	if( current_user_can('manage_options') ){
+		echo "<input type='hidden' name='userID' value='".$wpid."'>";
+	}
+	?>
 	<!-- yyyy-mm-dd -->
 	<input id="date" name="date" type="date" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
 	<button>Change date</button>
